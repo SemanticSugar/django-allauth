@@ -1,3 +1,5 @@
+import logging
+
 import requests
 
 from allauth.socialaccount.providers.oauth2.views import (OAuth2Adapter,
@@ -9,17 +11,15 @@ from .provider import AdRollProvider
 
 class AdRollOAuth2Adapter(OAuth2Adapter):
     provider_id = AdRollProvider.id
-    # access_token_url = 'https://accounts.adroll.com/o/oauth2/token'
-    # authorize_url = 'https://accounts.adroll.com/o/oauth2/auth'
-    # profile_url = 'https://www.adrollapis.com/oauth2/v1/userinfo'
-    access_token_url = 'https://127.0.0.1:8000/oauth2/token'
-    authorize_url = 'https://127.0.0.1:8000/oauth2/auth'
-    profile_url = 'https://www.adrollapis.com/oauth2/v1/userinfo'
+    access_token_url = 'https://login.adroll.com/oauth2/access_token'
+    authorize_url = 'https://login.adroll.com/oauth2/authorize'
+    profile_url = 'https://login.adroll.com/api/users/profile/'
 
     def complete_login(self, request, app, token, **kwargs):
+        auth = (app.client_id, token.token)
         resp = requests.get(self.profile_url,
-                            params={'access_token': token.token,
-                                    'alt': 'json'})
+                            params={'format': 'json'},
+                            auth=auth)
         extra_data = resp.json()
         login = self.get_provider() \
             .sociallogin_from_response(request,

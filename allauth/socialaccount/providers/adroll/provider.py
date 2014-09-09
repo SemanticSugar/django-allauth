@@ -31,10 +31,7 @@ class AdRollProvider(OAuth2Provider):
     account_class = AdRollAccount
 
     def get_default_scope(self):
-        scope = [Scope.PROFILE]
-        if QUERY_EMAIL:
-            scope.append(Scope.EMAIL)
-        return scope
+        return ['read']
 
     def get_auth_params(self, request, action):
         ret = super(AdRollProvider, self).get_auth_params(request,
@@ -44,17 +41,18 @@ class AdRollProvider(OAuth2Provider):
         return ret
 
     def extract_uid(self, data):
-        return str(data['id'])
+        return str(data['eid'])
 
     def extract_common_fields(self, data):
         return dict(email=data.get('email'),
-                    last_name=data.get('family_name'),
-                    first_name=data.get('given_name'))
+                    username=data.get('username'),
+                    last_name=data.get('first_name'),
+                    first_name=data.get('last_name'))
 
     def extract_email_addresses(self, data):
         ret = []
         email = data.get('email')
-        if email and data.get('verified_email'):
+        if email and data.get('verified_email', False):
             ret.append(EmailAddress(email=email,
                        verified=True,
                        primary=True))
